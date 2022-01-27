@@ -1,15 +1,14 @@
 #pragma once
-#ifndef INC_MINI_FORMAT_H_
-#define INC_MINI_FORMAT_H_
 #include <sstream>
 #include <functional>
 #include <vector>
+#include <thread>
 #include <chrono>
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
 
-using arg_builder_t = std::function<void(std::ostringstream &)>;
+using arg_builder_t = std::function<void(std::ostream &)>;
 inline std::string mini_format_impl(const std::string &fmt, const std::vector<arg_builder_t> &arg_builders) {
     std::ostringstream ss;
     size_t start = 0;
@@ -25,8 +24,8 @@ inline std::string mini_format_impl(const std::string &fmt, const std::vector<ar
 }
 
 template<typename Arg>
-arg_builder_t mini_format_arg(const Arg &arg) {
-    return [&arg](std::ostringstream &ss) { ss << arg; };
+inline arg_builder_t mini_format_arg(const Arg &arg) {
+    return [&arg](std::ostream &ss) { ss << arg; };
 }
 
 template<typename ...Args>
@@ -42,9 +41,10 @@ inline void mini_print(const std::string &fmt, const Args &...args) {
 inline void mini_log_info(const std::string &file, int line) {
     auto pos = file.find_last_of("\\/");
     auto now = time(0);
-    mini_print("[{}] [{}:{}] ", std::put_time(localtime(&now), "%Y-%m-%d_%H:%M:%S"), (pos == std::string::npos ? file : file.substr(pos)), line);
+    mini_print("[{}] [{}] [{}:{}] ",
+        std::put_time(localtime(&now), "%Y-%m-%d_%H:%M:%S"), 
+        std::this_thread::get_id(),
+        (pos == std::string::npos ? file : file.substr(pos + 1)), line);
 }
 
 #define MINI_LOG(...) do { mini_log_info(__FILE__, __LINE__); mini_print(__VA_ARGS__); } while(0)
-
-#endif // INC_MINI_FORMAT_H_
