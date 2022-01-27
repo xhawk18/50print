@@ -1,8 +1,6 @@
 # What's this
 
-Print formated string in c++20 std::format style.
-
-To use this code, just include "mini_format.h" is ok, only 50 lines of code within it!
+c++20 std::format/print implemented by 50 lines.
 
 # Usage
 
